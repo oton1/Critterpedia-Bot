@@ -64,10 +64,14 @@ async def on_message(message):
                     else:
                         availability = f"está disponível neste mês, mas nos seguintes horários: {creature['availability']['time'] if len(creature['availability']['time']) != 0 else 'O dia todo!'}"
                 response = f"Essa criatura vale {creature['price']} bells e {availability}"
+                embed = discord.Embed(title=creature_name.title().replace("_", " "), description=f"```{response}```")
+                embed.set_image(url=creature['image_uri'])
+                await message.reply(embed=embed)
         else:
             response = "Essa criatura não existe, meu chapa..."
+            await message.channel.send(response)
 
-        await message.channel.send(response)
+
 
 @client.event
 async def on_ready():
