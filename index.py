@@ -67,6 +67,7 @@ def getCreature(name):
         df = df.transpose()
         df.columns = ['bugs','sea','fish']
         
+        
     return creature
 
 
@@ -97,12 +98,49 @@ async def on_message(message):
                     availability = f"está disponível neste mês, mas nos seguintes horários: {creature['availability']['time'] if len(creature['availability']['time']) != 0 else 'O dia todo!'}"
                 response = f"Essa criatura vale {creature['price']} bells e {availability}"
                 embed = discord.Embed(title=creature_name.title().replace(
-                    "_", " "), description=f"```{response}```")
+                    "_", " "), description=f"```{response}```", color=0xA1300E)
                 embed.set_image(url=creature['image_uri'])
                 await message.reply(embed=embed)
         else:
             response = "Essa criatura não existe, meu chapa..."
             await message.channel.send(response)
+
+
+    elif message.content.startswith('!lista'):
+        month_name = message.content.split(' ')[1].capitalize()
+        if month_name in MONTH_NAMES:
+            list_bugs = []
+            list_sea = []
+            list_fish = []
+            for file in ['bugs.json', 'sea.json', 'fish.json']:
+                df = pd.read_json(file)
+                for col in df.columns:
+                    obj_month_array_southern = df[col]['availability']['month-array-southern']
+                    if MONTH_NAMES[obj_month_array_southern[0]-1] == month_name:
+                        if file == 'bugs.json':
+                            list_bugs.append(' '.join([w.capitalize() for w in col.split('_')]))
+                        elif file == 'sea.json':
+                            list_sea.append(' '.join([w.capitalize() for w in col.split('_')]))
+                        else:
+                            list_fish.append(' '.join([w.capitalize() for w in col.split('_')]))
+                    else:
+                        continue
+
+    if month_name in MONTH_NAMES:
+        embed = discord.Embed(title=f"Criaturas disponíveis em {month_name}", color=0xA1300E)
+        if list_bugs:
+            embed.add_field(name="Bugs", value="\n".join(list_bugs), inline=False)
+        if list_sea:
+            embed.add_field(name="Sea Creatures", value="\n".join(list_sea), inline=False)
+        if list_fish:
+            embed.add_field(name="Fish", value="\n".join(list_fish), inline=False)
+        await message.channel.send(embed=embed)
+        
+    else:
+        response = "Nome de mês inválido, tente novamente com um dos seguintes nomes de mês: " + ", ".join(MONTH_NAMES)
+
+        await message.channel.send(response)
+
 
 @client.event
 async def on_ready():
