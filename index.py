@@ -14,6 +14,7 @@ intent.members = True
 intent.message_content = True
 client = discord.Client(intents=intent)
 
+
 MONTH_NAMES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
@@ -76,7 +77,13 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('!info'):
+    if message.content.startswith('!help'):
+        embed = discord.Embed(title="Comandos disponíveis", description="Retorna informações sobre as criaturas e lista as disponíveis no mês especificado.", color=0xA1300E)
+        embed.add_field(name="!info <nome_da_criatura>", value="Retorna informações sobre a criatura.", inline=False)
+        embed.add_field(name="!lista <mês>", value="Retorna uma lista de criaturas disponíveis no mês especificado.", inline=False)
+        await message.channel.send(embed=embed)
+
+    elif message.content.startswith('!info'):
         creature_name = "_".join(message.content.split(' ')[1:])
         creature_name = creature_name.lower().replace(" ", "-")
         creature = getCreature(creature_name)
@@ -141,9 +148,9 @@ async def on_message(message):
 
         await message.channel.send(response)
 
-
 @client.event
 async def on_ready():
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name='!help para ver os comandos do bot'))
     print("Critterbot pronto pra uso! {0.user}".format(client))
 
 client.run(os.getenv("TOKEN"))
